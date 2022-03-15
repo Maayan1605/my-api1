@@ -24,10 +24,37 @@ router.post('/sayHello', (req, res) => {
         }
     }
     else{
-        return res.status(401).json({
+        return res.status(200).json({
             messege: `User not found`,
         });
     }
 });
+router.post('/addAcount', (req, res) => {
+    if(req.body.username && req.body.password && req.body.email){
+        const result = arr.find(user => user.email == req.body.email);
+        if(result != null){
+            return res.status(200).json({
+                messege: `User already exsists.`,
+            });
+        }
+        else{
+            const newAccount = {
+                username: req.body.username,
+                password: req.body.password,
+                email: req.body.email
+            }
+            arr.push(newAccount);
+            console.log(arr);
+            return res.status(200).json({
+                messege: `Welcome ${newAccount.username} from API route`,
+            });
+        }
+    }
+    else{
+        return res.status(200).json({
+            messege: `Invalid request`,
+        });
+    }
 
+});
 module.exports = router;
