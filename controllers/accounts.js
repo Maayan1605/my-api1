@@ -1,20 +1,40 @@
 const express = require('express');
 const router = express.Router();
+const bcriptjs = require('bcryptjs');
+const jsonwebtoken = require('jsonwebtoken');
 
-const arr = [
-    {
-        username: 'Bill Gates',
-        password: '12345',
-        email: 'billGates@gmail.com'
+const arr = []
+
+router.post('/login', async(req, res) => {
+    const {password, email} = req.body;
+    // const data = {
+    //     id: 123456789,
+    //     firstName: "First",
+    //     lastName: "Last",
+    //     email: "emailname@gmail.com"
+    // }
+    // const token = await jsonwebtoken.sign(data,'4itGC0cfFYaN6A9seeO5zypLbtGlYLLG');
+    const hash_password = await bcriptjs.hash(password,10);
+    const isMatch = await bcriptjs.compare(password, hash_password);
+    if(isMatch){
+        return res.status(200).json({
+            messege: "true",
+        });
     }
-]
-router.post('/sayHello', (req, res) => {
+    else{
+        return res.status(200).json({
+            messege: "false",
+        });
+    }
+});
+router.post('/signIn', async(req, res) => {
     const {password, email} = req.body;
     const result = arr.find(user => user.email == email);
     if(result){
-        if(result.password == password){
+        if(await bcriptjs.compare(password,result.password)){
+            const token = await jsonwebtoken.sign(result,'4itGC0cfFYaN6A9seeO5zypLbtGlYLLG');
             return res.status(200).json({
-                messege: `Hello ${result.username} from API route`,
+                messege: token,
             });
         }
         else{
@@ -29,7 +49,7 @@ router.post('/sayHello', (req, res) => {
         });
     }
 });
-router.post('/addAcount', (req, res) => {
+router.post('/addAcount', async(req, res) => {
     if(req.body.username && req.body.password && req.body.email){
         const result = arr.find(user => user.email == req.body.email);
         if(result != null){
@@ -40,7 +60,7 @@ router.post('/addAcount', (req, res) => {
         else{
             const newAccount = {
                 username: req.body.username,
-                password: req.body.password,
+                password: await bcriptjs.hash(req.body.password,10),
                 email: req.body.email
             }
             arr.push(newAccount);
@@ -55,6 +75,8 @@ router.post('/addAcount', (req, res) => {
             messege: `Invalid request`,
         });
     }
-
 });
+
+
+
 module.exports = router;
